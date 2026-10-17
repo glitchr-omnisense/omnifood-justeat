@@ -3,7 +3,7 @@
 ## Installation
 
 ```sh
-composer require glitchr/omnifood omnifood/justeat
+composer require omniscient/omnifood omnifood/justeat
 ```
 
 ## Configuration

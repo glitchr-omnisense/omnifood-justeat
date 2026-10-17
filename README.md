@@ -1,7 +1,7 @@
 # omnifood/justeat
 
 Just Eat Takeaway.com (Just Eat, Takeaway, Skip The Dishes, Menulog) for
-[glitchr/omnifood](https://github.com/glitchr-studio/omnifood): the orders JET Connect pushes to the
+[omniscient/omnifood](https://github.com/glitchr-studio/omnifood): the orders JET Connect pushes to the
 restaurant read and confirmed in the till, the cancellations and the drivers' progress, the menu
 pushed and its items out of stock, the restaurant set offline and online and its service times -
 through **JET Connect**, Just Eat's public point-of-sale API (formerly Flyt).
