@@ -1,7 +1,7 @@
 # omnifood/justeat
 
 Just Eat Takeaway.com (Just Eat, Takeaway, Skip The Dishes, Menulog) for
-[omniscient/omnifood](https://github.com/glitchr-studio/omnifood): the orders JET Connect pushes to the
+[omnisense/omnifood](https://github.com/glitchr-omnisense/omnifood): the orders JET Connect pushes to the
 restaurant read and confirmed in the till, the cancellations and the drivers' progress, the menu
 pushed and its items out of stock, the restaurant set offline and online and its service times -
 through **JET Connect**, Just Eat's public point-of-sale API (formerly Flyt).
@@ -28,7 +28,7 @@ $justeat = (new JustEatPlatformFactory(HttpClient::create()))->create([
 
 Plain PHP, no framework needed: the factory takes any `HttpClientInterface` - the application's, a
 `MockHttpClient` in a test - and makes its own when given none. In a Symfony application, the same
-options under `omnifood.platforms` ([the bundle](https://github.com/glitchr-studio/omnifood/blob/1.x/docs/symfony.md)):
+options under `omnifood.platforms` ([the bundle](https://github.com/glitchr-omnisense/omnifood/blob/1.x/docs/symfony.md)):
 
 ```yaml
 omnifood:
