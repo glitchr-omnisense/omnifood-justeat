@@ -147,6 +147,17 @@ final class JustEatPlatformTest extends TestCase
         $this->platform(['webhook_key' => null, 'webhook_secret' => null])->notify($body, []);
     }
 
+    /** With the secret alone, a webhook without X-JET-Connect-Hash has nothing to be checked by: refused. */
+    public function testWithTheSecretAloneEveryWebhookIsChecked(): void
+    {
+        $platform = $this->platform(['webhook_key' => null]);
+        $cancellation = '{"orderID":"38bb","reason":{"code":"custCancelledMadeMistake"}}';
+
+        self::assertSame('order.cancelled', $platform->notify($cancellation, self::signed($cancellation))->event, 'signed: read');
+        $this->expectException(InvalidSignatureException::class);
+        $platform->notify($cancellation, []);
+    }
+
     public function testTheOtherWebhooks(): void
     {
         $platform = $this->platform(['webhook_secret' => null]);
@@ -277,6 +288,21 @@ final class JustEatPlatformTest extends TestCase
         self::assertSame(['Delivery', 'Collection'], array_column($hours['serviceTimes'], 'serviceType'));
         self::assertSame([['openingTime' => '10:00', 'closingTime' => '18:00'], ['openingTime' => '20:00', 'closingTime' => '23:00']], $hours['serviceTimes'][0]['openingTimes']['monday']);
         self::assertSame([], $hours['serviceTimes'][1]['openingTimes']['sunday']);
+    }
+
+    /** A 2xx whose body is not JSON (a proxy's page) is not an empty answer. */
+    public function testAnAnswerThatIsNotJsonIsAnError(): void
+    {
+        $this->expectException(ProviderException::class);
+        $this->expectExceptionMessage('[justeat] An answer that is not JSON (HTTP 200).');
+        $this->platform([], new MockResponse('<html><body>502 Bad Gateway</body></html>', ['http_code' => 200, 'response_headers' => ['Content-Type: text/html']]))->resume();
+    }
+
+    public function testATimezoneItCannotReadIsAnInvalidConfig(): void
+    {
+        $this->expectException(InvalidConfigException::class);
+        $this->expectExceptionMessage('The "justeat" platform\'s timezone "Mars/Olympus" is not a time zone.');
+        $this->platform(['timezone' => 'Mars/Olympus']);
     }
 
     public function testErrorsAreMapped(): void

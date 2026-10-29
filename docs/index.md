@@ -62,12 +62,9 @@ the package is installed.
 | `base_uri` | string | `https://api.flytplatform.com` | no | another API address |
 
 No option is checked when the platform is built, except `timezone`, read by `new
-\DateTimeZone()` there. A call that needs a key and finds it empty throws `InvalidConfigException`
+\DateTimeZone()` there: one it cannot read is an `InvalidConfigException` (`The "justeat"
+platform's timezone "Mars/Olympus" is not a time zone.`). A call that needs a key and finds it empty throws `InvalidConfigException`
 (`The "justeat" platform needs: api_key.`, `... needs: restaurant.`).
-
-> [!WARNING]
-> Known defect: an unknown `timezone` throws PHP's own `\Exception` from the factory, where an
-> `InvalidConfigException` is expected.
 
 ## Capabilities
 
@@ -123,13 +120,11 @@ answered 200 with the same body; a 500 makes JET retry, up to 5 times.
 
 **The check.** With `webhook_key`, the `Authorization` header must equal it (constant time). With
 `webhook_secret`, `X-JET-Connect-Hash` (`HMAC-SHA256 t=...,signature=<base64>`) must hold the
-base64 HMAC-SHA256 of the body; it is checked on an order body, and on any body that carries the
-header. Neither configured: `InvalidConfigException`.
-
-> [!WARNING]
-> Known defect: with only `webhook_secret` set, a cancellation, driver, offline or backup-flow
-> body sent without `X-JET-Connect-Hash` is accepted unchecked, where every webhook should be
-> authenticated. Configure `webhook_key` as well.
+base64 HMAC-SHA256 of the body; it is checked on an order body, on any body that carries the
+header, and, when `webhook_secret` is set without `webhook_key`, on every body: JET documents the
+hash on the order webhooks only, so a cancellation, driver, offline or backup-flow body without it
+is then refused (`InvalidSignatureException`) - configure `webhook_key` to receive those. Neither
+configured: `InvalidConfigException`.
 
 **Accept and deny.** `accept()` posts an empty object to sent-to-pos-success; `$readyAt` is not
 sent. `deny()` posts `happenedAt` (now, ATOM), `errorCode` (`MENU_ERROR` for `ITEM_UNAVAILABLE`
@@ -226,13 +221,11 @@ Not run live (no key).
   `errorMessage` or the first fault's `description` (else `HTTP <status>.`), the fault's
   `errorCode` as `providerCode`. A 429 has no message of its own here.
 - A network failure: `ProviderException` `JET Connect could not be reached: ...`.
+- A 2xx answer whose body is not JSON (a proxy's or a maintenance page): `ProviderException`
+  `An answer that is not JSON (HTTP 200).`, with the status.
 - `order()`, `orders()`, `ready()`, `cancel()`, `status()`: `NotSupportedException`.
 - A webhook whose key or hash does not hold, or whose body is not JSON:
   `InvalidSignatureException`.
-
-> [!WARNING]
-> Known defect: a 2xx answer whose body is not JSON is read as an empty answer, where a
-> `ProviderException` is expected.
 
 ## Verified, and not
 

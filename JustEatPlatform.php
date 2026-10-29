@@ -262,8 +262,10 @@ final class JustEatPlatform implements OrdersInterface, MenuInterface, StoreInte
      * Authorization header; the HMAC secret, as X-JET-Connect-Hash
      * ("HMAC-SHA256 t=...,signature=<base64 HMAC-SHA256 of the body>"),
      * which JET documents on the order webhooks. One of the two must be
-     * configured. JET gives no event id: Notification::$id is composed from
-     * the order and the event, the same on a retry.
+     * configured; with the secret alone, a webhook without the hash is
+     * refused (configure the key to receive the others, checked by it). JET
+     * gives no event id: Notification::$id is composed from the order and
+     * the event, the same on a retry.
      *
      * The endpoint answers each with 200 and the same body (an order:
      * {"OrderId": ...}); a 500 makes JET retry, up to 5 times.
@@ -282,7 +284,9 @@ final class JustEatPlatform implements OrdersInterface, MenuInterface, StoreInte
             throw new InvalidSignatureException($this->getName(), 'The body is not JSON.');
         }
         $isOrder = isset($data['third_party_order_reference'], $data['items']);
-        if ($this->webhookSecret && (isset($headers['x-jet-connect-hash']) || $isOrder)) {
+        // The hash is checked on the orders, on every body that carries one, and on every body when the
+        // secret is all there is to check by (JET documents the hash on the order webhooks only).
+        if ($this->webhookSecret && (isset($headers['x-jet-connect-hash']) || $isOrder || !$this->webhookKey)) {
             $this->checkHash($body, $headers['x-jet-connect-hash'] ?? '');
         }
 

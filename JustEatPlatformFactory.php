@@ -3,6 +3,7 @@
 namespace Omnifood\JustEat;
 
 use Omnifood\Config;
+use Omnifood\Exception\InvalidConfigException;
 use Omnifood\PlatformFactory;
 use Omnifood\PlatformInterface;
 
@@ -45,13 +46,19 @@ final class JustEatPlatformFactory extends PlatformFactory
 
     protected function build(Config $config): PlatformInterface
     {
+        try {
+            $timezone = new \DateTimeZone((string) $config['timezone']);
+        } catch (\Exception $e) {
+            throw new InvalidConfigException(\sprintf('The "justeat" platform\'s timezone "%s" is not a time zone.', $config['timezone']), 0, $e);
+        }
+
         return new JustEatPlatform(
             new Api($config['api_key'] ? (string) $config['api_key'] : null, (string) $config['base_uri'], $this->http),
             $config['restaurant'] ? (string) $config['restaurant'] : null,
             $config['webhook_key'] ? (string) $config['webhook_key'] : null,
             $config['webhook_secret'] ? (string) $config['webhook_secret'] : null,
             (string) $config['currency'],
-            new \DateTimeZone((string) $config['timezone']),
+            $timezone,
             strtoupper((string) $config['menu_type']),
             (float) $config['standard_vat_rate'],
         );

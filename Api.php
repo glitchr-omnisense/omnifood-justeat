@@ -51,6 +51,10 @@ final class Api
             throw new ProviderException(self::PLATFORM, 'JET Connect could not be reached: '.$e->getMessage(), null, null, $e);
         }
         $data = '' === $content ? [] : json_decode($content, true);
+        if ($status < 400 && null === $data && \JSON_ERROR_NONE !== json_last_error()) {
+            // A proxy's or a maintenance page: not an empty answer.
+            throw new ProviderException(self::PLATFORM, \sprintf('An answer that is not JSON (HTTP %d).', $status), $status);
+        }
         $data = \is_array($data) ? $data : [];
         if ($status >= 400 || false === ($data['success'] ?? null)) {
             throw self::error($status, $data);
