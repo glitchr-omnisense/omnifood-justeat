@@ -5,6 +5,7 @@ namespace Omnifood\JustEat;
 use Omnifood\Exception\InvalidConfigException;
 use Omnifood\Exception\ProviderException;
 use Omnifood\Exception\UnauthorizedException;
+use Omnifood\Http\Redaction;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -43,21 +44,24 @@ final class Api
         if (null !== $json) {
             $options['json'] = $json;
         }
+        $url = rtrim($this->baseUri, '/').'/'.ltrim($path, '/');
         try {
-            $response = $this->http->request($method, rtrim($this->baseUri, '/').'/'.ltrim($path, '/'), $options);
+            $response = $this->http->request($method, $url, $options);
             $status = $response->getStatusCode();
             $content = $response->getContent(false);
         } catch (HttpExceptionInterface $e) {
-            throw new ProviderException(self::PLATFORM, 'JET Connect could not be reached: '.$e->getMessage(), null, null, $e);
+            $secrets = [...Redaction::secrets($url, $options), ...array_filter([$this->apiKey])];
+
+            throw Redaction::withoutArguments(new ProviderException(self::PLATFORM, 'JET Connect could not be reached: '.Redaction::text($e->getMessage(), $secrets), null, null, Redaction::copy($e, $secrets)));
         }
         $data = '' === $content ? [] : json_decode($content, true);
         if ($status < 400 && null === $data && \JSON_ERROR_NONE !== json_last_error()) {
             // A proxy's or a maintenance page: not an empty answer.
-            throw new ProviderException(self::PLATFORM, \sprintf('An answer that is not JSON (HTTP %d).', $status), $status);
+            throw Redaction::withoutArguments(new ProviderException(self::PLATFORM, \sprintf('An answer that is not JSON (HTTP %d).', $status), $status));
         }
         $data = \is_array($data) ? $data : [];
         if ($status >= 400 || false === ($data['success'] ?? null)) {
-            throw self::error($status, $data);
+            throw Redaction::withoutArguments(self::error($status, $data));
         }
 
         return $data;

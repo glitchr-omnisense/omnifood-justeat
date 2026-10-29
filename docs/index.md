@@ -227,6 +227,12 @@ Not run live (no key).
 - A webhook whose key or hash does not hold, or whose body is not JSON:
   `InvalidSignatureException`.
 
+No failure carries the API key: a network failure's message has it masked as `***` (the key
+parameters of a URL too), its previous is a copy of the HTTP client's exception (the same class and
+code), and no trace of the chain keeps its arguments, where the request's options stood ([No secret
+in a
+failure](https://github.com/glitchr-omnisense/omnifood/blob/1.x/docs/errors.md#no-secret-in-a-failure)).
+
 ## Verified, and not
 
 `Tests/JustEatPlatformTest.php` checks, on JET's documented examples (read on 2026-10-04): the
