@@ -214,6 +214,14 @@ omnifood:
 
 Not run live (no key).
 
+## Usage policy
+
+`policy.json` (named in `composer.json`'s `extra.omnisense.policy`, read 2026-11-10) declares
+the access contract-only (the JET Connect API key comes from Just Eat Takeaway.com) and the rate
+limits unknown: JET publishes none. A 429 is a `RateLimitedException`, never retried, and JET's
+next calls wait for its `Retry-After`, unsent. JET Connect offers no idempotency key on the order
+callbacks or the menu ingestion: each is sent once, the HTTP client's retries off. See omnisense/omnifood's [Usage policies and rate limits](https://github.com/glitchr-omnisense/omnifood/blob/1.x/docs/policies.md).
+
 ## Errors
 
 - 401 and 403: `UnauthorizedException`; any other status of 400 or more, and any answer with

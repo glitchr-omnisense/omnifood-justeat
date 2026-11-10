@@ -1,0 +1,38 @@
+{
+    "$schema": "https://github.com/glitchr-omnisense/contracts/blob/1.x/resources/usage-policy.schema.json",
+    "provider": "justeat",
+    "rateLimits": null,
+    "concurrency": null,
+    "rights": {
+        "commercial": "contract",
+        "openSourceRequired": false,
+        "caching": {
+            "permission": "contract",
+            "maxTtl": null
+        },
+        "storage": "contract",
+        "redistribution": "contract",
+        "attribution": {
+            "required": false,
+            "text": null,
+            "url": null,
+            "where": []
+        },
+        "licence": null
+    },
+    "requirements": {
+        "key": true,
+        "userAgent": {
+            "required": false,
+            "pattern": null
+        }
+    },
+    "provenance": {
+        "terms": null,
+        "policy": "https://uk.api.just-eat.io/docs/jetconnect/openapi.yaml",
+        "contact": "https://developers.just-eat.com/",
+        "notes": "Contract-only: JET Connect is the point-of-sale integration of Just Eat Takeaway.com's partners, the X-Flyt-Api-Key issued by JET; its OpenAPI document (read 2026-11-10) publishes no rate limit and the portal no API terms (limits unknown, hence null). JET retries a webhook answered 500 up to 5 times. No idempotency key on the order callbacks and menu ingestion: Omnifood sends each once, never retried.",
+        "verifiedAt": "2026-11-10",
+        "declaredBy": "maintainer"
+    }
+}

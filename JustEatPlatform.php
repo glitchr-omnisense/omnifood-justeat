@@ -31,6 +31,8 @@ use Omnifood\NotifiableInterface;
 use Omnifood\OrdersInterface;
 use Omnifood\StoreInterface;
 use Omnifood\Validator;
+use Omnisense\Contracts\Policy\DeclaresUsagePolicyInterface;
+use Omnisense\Contracts\Policy\UsagePolicy;
 
 /**
  * A restaurant on Just Eat Takeaway.com through JET Connect, the public
@@ -54,8 +56,10 @@ use Omnifood\Validator;
  *   online, and its service times replaced. Its current state is not
  *   readable: status() throws NotSupportedException.
  */
-final class JustEatPlatform implements OrdersInterface, MenuInterface, StoreInterface, NotifiableInterface
+final class JustEatPlatform implements OrdersInterface, MenuInterface, StoreInterface, NotifiableInterface, DeclaresUsagePolicyInterface
 {
+    private static ?UsagePolicy $policy = null;
+
     /** JET lists each cereal and each nut; Omnifood's GLUTEN and NUTS are the regulation's families. */
     public const CEREALS = ['CEREAL_WHEAT', 'CEREAL_RYE', 'CEREAL_BARLEY', 'CEREAL_OATS', 'CEREAL_SPELT', 'CEREAL_KAMUT'];
     public const NUTS = ['NUTS_ALMONDS', 'NUTS_HAZELNUTS', 'NUTS_WALNUTS', 'NUTS_CASHEWS', 'NUTS_PECAN', 'NUTS_BRAZIL', 'NUTS_PISTACHIO', 'NUTS_MACADAMIA'];
@@ -82,6 +86,12 @@ final class JustEatPlatform implements OrdersInterface, MenuInterface, StoreInte
         private readonly float $standardVatRate = 20.0,
         private readonly Validator $validator = new Validator(),
     ) {
+    }
+
+    /** Its usage policy, as the package declares it (policy.json, read once). */
+    public function usagePolicy(): UsagePolicy
+    {
+        return self::$policy ??= UsagePolicy::fromFile(__DIR__.'/policy.json');
     }
 
     public function getName(): string

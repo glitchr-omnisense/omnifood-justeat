@@ -2,11 +2,24 @@
     "name": "omnifood/justeat",
     "type": "library",
     "description": "Omnifood Just Eat: the orders JET Connect sends to the restaurant, the menu and the items out of stock, the restaurant set offline and its service times - Just Eat, Takeaway, Skip The Dishes, Menulog - through the public JET Connect API.",
-    "keywords": ["restaurant", "delivery", "justeat", "takeaway", "jet-connect", "omnifood"],
+    "keywords": [
+        "restaurant",
+        "delivery",
+        "justeat",
+        "takeaway",
+        "jet-connect",
+        "omnifood"
+    ],
     "license": "MIT",
-    "authors": [{"name": "Marco Meyer", "email": "marco.meyer@glitchr.io"}],
+    "authors": [
+        {
+            "name": "Marco Meyer",
+            "email": "marco.meyer@glitchr.io"
+        }
+    ],
     "require": {
         "php": ">=8.2",
+        "omnisense/contracts": "^1.0@dev",
         "omnisense/omnifood": "^1.0@dev",
         "symfony/http-client": "^6.4|^7.0|^8.0"
     },
@@ -14,11 +27,24 @@
         "phpunit/phpunit": "^11.0"
     },
     "autoload": {
-        "psr-4": {"Omnifood\\JustEat\\": ""},
-        "exclude-from-classmap": ["/Tests/"]
+        "psr-4": {
+            "Omnifood\\JustEat\\": ""
+        },
+        "exclude-from-classmap": [
+            "/Tests/"
+        ]
     },
     "autoload-dev": {
-        "psr-4": {"Omnifood\\JustEat\\Tests\\": "Tests/"}
+        "psr-4": {
+            "Omnifood\\JustEat\\Tests\\": "Tests/"
+        }
     },
-    "config": {"sort-packages": true}
+    "extra": {
+        "omnisense": {
+            "policy": "policy.json"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
 }

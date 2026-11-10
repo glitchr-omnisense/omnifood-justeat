@@ -53,7 +53,7 @@ final class JustEatPlatformFactory extends PlatformFactory
         }
 
         return new JustEatPlatform(
-            new Api($config['api_key'] ? (string) $config['api_key'] : null, (string) $config['base_uri'], $this->http),
+            new Api($config['api_key'] ? (string) $config['api_key'] : null, (string) $config['base_uri'], $this->http, $config->backoff()),
             $config['restaurant'] ? (string) $config['restaurant'] : null,
             $config['webhook_key'] ? (string) $config['webhook_key'] : null,
             $config['webhook_secret'] ? (string) $config['webhook_secret'] : null,

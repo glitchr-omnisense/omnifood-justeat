@@ -5,7 +5,10 @@ namespace Omnifood\JustEat;
 use Omnifood\Exception\InvalidConfigException;
 use Omnifood\Exception\ProviderException;
 use Omnifood\Exception\UnauthorizedException;
+use Omnifood\Http\NoRetry;
 use Omnifood\Http\Redaction;
+use Omnifood\Http\Throttle;
+use Omnisense\Contracts\Policy\Backoff;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -29,8 +32,11 @@ final class Api
         private readonly ?string $apiKey = null,
         private readonly string $baseUri = self::BASE_URI,
         ?HttpClientInterface $http = null,
+        /** The waits JET Connect asks for (omnisense/contracts' Backoff): no call while one lasts, a 429 a RateLimitedException, never retried */
+        private readonly ?Backoff $backoff = null,
     ) {
-        $this->http = $http ?? HttpClient::create();
+        // Sent once: no retry of the HTTP client's either (Http\NoRetry).
+        $this->http = NoRetry::of($http ?? HttpClient::create());
     }
 
     /**
@@ -45,9 +51,11 @@ final class Api
             $options['json'] = $json;
         }
         $url = rtrim($this->baseUri, '/').'/'.ltrim($path, '/');
+        Throttle::before($this->backoff);
         try {
             $response = $this->http->request($method, $url, $options);
             $status = $response->getStatusCode();
+            $received = $response->getHeaders(false);
             $content = $response->getContent(false);
         } catch (HttpExceptionInterface $e) {
             $secrets = [...Redaction::secrets($url, $options), ...array_filter([$this->apiKey])];
@@ -61,8 +69,12 @@ final class Api
         }
         $data = \is_array($data) ? $data : [];
         if ($status >= 400 || false === ($data['success'] ?? null)) {
-            throw Redaction::withoutArguments(self::error($status, $data));
+            $error = self::error($status, $data);
+            Throttle::after($this->backoff, self::PLATFORM, $status, $received, 'Too many calls, try again later: '.substr($error->getMessage(), \strlen('['.self::PLATFORM.'] ')), $error->providerCode);
+
+            throw Redaction::withoutArguments($error);
         }
+        Throttle::after($this->backoff, self::PLATFORM, $status, $received);
 
         return $data;
     }
