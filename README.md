@@ -46,6 +46,18 @@ omnifood:
                 standard_vat_rate: 20.0  # at this rate STANDARD_RATE, under it REDUCED_RATE, at 0 NO_TAX
 ```
 
+## Install
+
+```sh
+composer require omnifood/justeat
+```
+
+It requires `omnisense/omnifood` `^1.0`, installed with it. A real call needs: **a JET Connect API
+key**: Just Eat Takeaway gives it only to partners under a commercial agreement. With no account,
+its tests run on recorded answers (a `MockHttpClient`), and
+[omnisense/omnifood](https://github.com/glitchr-omnisense/omnifood#install-and-a-first-call)'s
+README has a first call that runs without one.
+
 ## How JET Connect works
 
 An order is accepted on JET's **Orderpad** (the tablet), then pushed to the restaurant's endpoint
